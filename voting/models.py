@@ -89,7 +89,8 @@ class VoteItem(PolymorphicModel):
 
 
 class YesNoAbstain(VoteItem):
-    pass
+    def user_vote(self, user):
+        return self.ynavote_set.filter(user=user).first()
 
 
 class YNAVote(models.Model):
@@ -97,13 +98,25 @@ class YNAVote(models.Model):
         YES = 'Y', _('Yes')
         NO = 'N', _('No')
         ABSTAIN = 'A', _('Abstain')
-    choice = models.CharField(max_length=1, choices=YNA.choices)
+
+    class Meta:
+        unique_together = ('user', 'yna')
+    choice = models.CharField(
+        max_length=1, choices=YNA.choices, default=None, blank=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     yna = models.ForeignKey(YesNoAbstain, on_delete=models.CASCADE)
+
+    def __str__(self):
+        """Unicode representation of a vote item."""
+        choices = dict(self.YNA.choices)
+        return str(choices[self.choice])
 
 
 class MultipleChoice(VoteItem):
     max_votes = models.PositiveIntegerField()
+
+    def user_vote(self, user):
+        return None
 
 
 class ChoiceOption(models.Model):

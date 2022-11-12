@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{%block title%}
+{% block title %}
 {{ event.description }}
 
 <p class="text-sm">
@@ -14,12 +14,17 @@
 {%endblock%}
 {% block content %}
 
-
 <h2 class="text-xl">click on these exciting topics to vote!</h2>
 <ul class="list-disc text-lg">
-    {% for item in items %}
-    <li><a href="{% url 'voting:vote_yna' item.id %}">{{ item.description }}</a>
-        <br><p class="text-sm">you have not yet voted</p>
+    {% for item, vote_data in items_votes %}
+    <li><a href="{{ vote_data.url }}">{{ item.description }}</a>
+        <br><p class="text-sm">
+            {% if vote_data.vote %}
+            you have voted <strong>{{ vote_data.vote }}</strong>
+            {% else %}
+            you have not yet voted
+            {% endif %}
+        </p>
     </li>
     {% endfor %}
 </ul>
