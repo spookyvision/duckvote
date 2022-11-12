@@ -3,7 +3,7 @@ from django import forms
 from typing import Any
 from django.shortcuts import render
 from .models import VoteEvent, VoteItem, YNAVote
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, FormMixin
 from django.urls import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -46,11 +46,7 @@ class YNAForm(forms.ModelForm):
         return cleaned_data
 
 
-class YNACreateView(CreateView):
-    model = YNAVote
-    form_class = YNAForm
-    success_url = reverse_lazy('voting:index')
-
+class YNAMixin:
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         res = super().get_context_data(**kwargs)
         item = YesNoAbstain.objects.get(pk=self.kwargs['yna_id'])
@@ -62,18 +58,19 @@ class YNACreateView(CreateView):
         res.yna_id = self.kwargs['yna_id']
         return res
 
+
+class YNACreateView(YNAMixin, CreateView):
+    model = YNAVote
+    form_class = YNAForm
+    success_url = reverse_lazy('voting:index')
+
     def form_valid(self, form):
         form.instance.user_id = self.request.user.id
         form.instance.yna_id = self.kwargs['yna_id']
         return super().form_valid(form)
 
 
-class YNAUpdateView(UpdateView):
+class YNAUpdateView(YNAMixin, UpdateView):
     model = YNAVote
     form_class = YNAForm
     success_url = reverse_lazy('voting:index')
-
-    def get_form(self, form_class=None):
-        res = super().get_form(form_class)
-        res.yna_id = self.kwargs['yna_id']
-        return res
