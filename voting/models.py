@@ -1,7 +1,10 @@
+from django.utils.timezone import now
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from uuid import uuid4
 from django.contrib.auth.hashers import make_password
+from django.utils.translation import gettext_lazy as _
+from polymorphic.models import PolymorphicModel
 
 
 class UserManager(BaseUserManager):
@@ -31,7 +34,90 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.UUIDField(unique=True)
+    is_admin = models.BooleanField(default=False)
     # TODO _most_ will be email addresses, but not the admin...
-    username = models.CharField(unique=True, max_length=254)
+    username = models.CharField(
+        _("username/email"), unique=True, max_length=254)
     USERNAME_FIELD = 'username'
     objects = UserManager()
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_admin
+
+
+class VoteEvent(models.Model):
+    class Meta:
+        verbose_name = _("vote event")
+        verbose_name_plural = _("vote events")
+
+    description = models.TextField(_('event description'))
+    start_at = models.DateTimeField(
+        _("event start"), auto_now=False, auto_now_add=False)
+    end_at = models.DateTimeField(
+        _("event end"), auto_now=False, auto_now_add=False)
+
+    def __str__(self):
+        """Unicode representation of a vote event."""
+        # return f'{VoteEvent._meta.verbose_name.capitalize()}: {self.description}'
+        return self.description
+
+    def has_started(self):
+        return self.start_at <= now()
+
+    def has_ended(self):
+        return now() > self.end_at
+
+    def is_live(self):
+        return self.has_started() and not self.has_ended()
+
+
+class VoteItem(PolymorphicModel):
+    class Meta:
+        verbose_name = _("vote item")
+        verbose_name_plural = _("vote items")
+
+    event = models.ForeignKey(
+        VoteEvent, on_delete=models.CASCADE)
+    description = models.TextField(_('description'))
+
+    def __str__(self):
+        """Unicode representation of a vote item."""
+        return self.description
+
+
+class YesNoAbstain(VoteItem):
+    pass
+
+
+class YNAVote(models.Model):
+    class YNA(models.TextChoices):
+        YES = 'Y', _('Yes')
+        NO = 'N', _('No')
+        ABSTAIN = 'A', _('Abstain')
+    choice = models.CharField(max_length=1, choices=YNA.choices)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    yna = models.ForeignKey(YesNoAbstain, on_delete=models.CASCADE)
+
+
+class MultipleChoice(VoteItem):
+    max_votes = models.PositiveIntegerField()
+
+
+class ChoiceOption(models.Model):
+    item = models.ForeignKey(MultipleChoice, on_delete=models.CASCADE)
+    description = models.CharField(_('description'), max_length=254)
+
+    def __str__(self):
+        """Unicode representation of a choice option."""
+        return self.description
+
+
+class ChoiceVote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    choice = models.ForeignKey(ChoiceOption, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'choice')

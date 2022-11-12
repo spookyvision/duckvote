@@ -14,8 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from django.views.generic.base import RedirectView
+from voting import urls as vurls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('', RedirectView.as_view(url='voting'), name='voting'),
+    path('voting/', include(vurls)),
+    path('__debug__/', include('debug_toolbar.urls')),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]

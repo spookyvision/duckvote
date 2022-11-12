@@ -3,7 +3,7 @@ from typing import Any, Optional
 from django.contrib.auth.backends import AllowAllUsersModelBackend
 from django.http import HttpRequest
 
-from voting.models import User
+from .models import User
 
 
 class AuthBackend(AllowAllUsersModelBackend):

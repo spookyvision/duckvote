@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{%block title%}
+{{ event.description }}
+
+<p class="text-sm">
+    {% if event.is_active %}
+    votiing is live! (TODO hms left)
+    {% elif event.has_ended %}
+    event has ended at TODO
+    {% else %}
+    event has not started yet, come back later! (starts at TODO, in TODO hms)
+    {% endif %}
+</p>
+{%endblock%}
+{% block content %}
+
+
+<h2 class="text-xl">click on these exciting topics to vote!</h2>
+<ul class="list-disc text-lg">
+    {% for item in items %}
+    <li><a href="{% url 'voting:vote_yna' item.id %}">{{ item.description }}</a>
+        <br><p class="text-sm">you have not yet voted</p>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
