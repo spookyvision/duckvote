@@ -1,10 +1,15 @@
+from ordered_model.models import OrderedModel, OrderedModelManager, OrderedModelQuerySet
+from polymorphic.compat import with_metaclass
 from django.utils.timezone import now
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from uuid import uuid4
 from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
+from ordered_model.models import OrderedModel
 from polymorphic.models import PolymorphicModel
+from polymorphic.query import PolymorphicQuerySet
+from polymorphic.managers import PolymorphicManager
 
 
 class UserManager(BaseUserManager):
@@ -74,10 +79,23 @@ class VoteEvent(models.Model):
         return self.has_started() and not self.has_ended()
 
 
-class VoteItem(PolymorphicModel):
+class ItemQuerySet(PolymorphicQuerySet, OrderedModelQuerySet):
+    pass
+
+
+class ItemManager(PolymorphicManager, OrderedModelManager):
+    def get_queryset(self):
+        return ItemQuerySet(self.model, using=self._db)
+
+
+class VoteItem(PolymorphicModel, OrderedModel):
+    order_class_path = __module__ + '.VoteItem'
+    objects = ItemManager()
+
     class Meta:
         verbose_name = _("vote item")
         verbose_name_plural = _("vote items")
+        ordering = ('order',)
 
     event = models.ForeignKey(
         VoteEvent, on_delete=models.CASCADE)

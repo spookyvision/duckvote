@@ -16,6 +16,10 @@ from pathlib import Path
 
 django_stubs_ext.monkeypatch()
 
+try:
+    from .settings_prod import *
+except:
+    from .settings_dev import *
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     'django_extensions',
+    'ordered_model',
     'tailwind',
     'django_browser_reload',
     'theme',
