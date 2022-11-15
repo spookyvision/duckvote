@@ -10,11 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-# "I cannot use QuerySet or Manager with type annotations"
-import django_stubs_ext
 from pathlib import Path
 
-django_stubs_ext.monkeypatch()
 
 try:
     from .settings_prod import *
@@ -22,19 +19,6 @@ except:
     from .settings_dev import *
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*299te!-)2li@uk174d^f8_fd6(3@tknux=b+op+2wd0_bj@90"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
@@ -141,9 +125,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "voting.User"
 
-# debug toolbar, also tailwind (for browser reload, presumably)
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
 
 TAILWIND_APP_NAME = 'theme'
