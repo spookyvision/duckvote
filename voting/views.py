@@ -104,6 +104,7 @@ class YNAMixin:
         res = super().get_context_data(**kwargs)
         item = YesNoAbstain.objects.get(pk=self.kwargs['yna_id'])
         res['title'] = item.description
+        res['detail_link'] = item.detail_link
         return res
 
     def get_form(self, form_class=None):

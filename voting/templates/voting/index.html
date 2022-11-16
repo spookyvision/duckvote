@@ -17,11 +17,17 @@
     Voting has not started yet, come back later! ({{ event.start_at | naturaltime }})
     {% endif %}
 </p>
-<p class="my-4 text-xl text-sky-700 dark:text-sky-400">click on these exciting topics to vote! You can keep editing your choices until the voting is closed.</p>
+<p class="my-4 text-xl text-sky-700 dark:text-sky-400">Click on these exciting topics to vote! You can keep editing your choices until the voting is closed.</p>
 <ul class="list-disc text-lg">
     {% for item, vote_data in items_votes %}
-    <li class="text-sky-500 dark:text-sky-500 my-4"><a href="{{ vote_data.url }}">{{ item.description }}</a>
-        <br><p class="text-sm text-sky-700 dark:text-slate-400">
+    <li class="text-sky-500 dark:text-sky-500 my-6"><a href="{{ vote_data.url }}">{{ item.description }}</a>
+        <br>
+        
+        {% if item.detail_link %}
+            <a class="text-base text-sky-600" target="_blank" href="{{ item.detail_link }}">🔗 further details</a>
+        {% endif %}
+            
+        <p class="text-sm text-sky-700 dark:text-slate-400">
             {% if vote_data.vote %}
             you have voted <strong class="dark:text-slate-300">{{ vote_data.vote }}</strong>
             {% else %}

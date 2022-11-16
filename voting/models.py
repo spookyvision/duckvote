@@ -100,6 +100,7 @@ class VoteItem(PolymorphicModel, OrderedModel):
     event = models.ForeignKey(
         VoteEvent, on_delete=models.CASCADE)
     description = models.TextField(_('description'))
+    detail_link = models.URLField(_('detail link'), blank=True)
 
     def __str__(self):
         """Unicode representation of a vote item."""

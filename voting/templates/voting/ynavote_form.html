@@ -4,7 +4,11 @@
 {{ title }}
 {% endblock %}
 {% block content %}
-<form method="post">
+{% if detail_link %}
+    <a class="text-xl text-sky-500 dark:text-sky-500" target="_blank" href="{{ detail_link }}">🔗 further details</a>
+{% endif %}
+
+<form class="my-3" method="post">
     {% csrf_token %}
 {{ form.as_div }}
 <input
