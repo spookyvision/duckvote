@@ -132,3 +132,4 @@ dmypy.json
 settings_dev.py
 settings_prod.py
 prod.sh
+/*.json
