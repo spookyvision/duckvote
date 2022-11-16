@@ -14,6 +14,7 @@
 {%endblock%}
 {% block content %}
 
+<p class="text-sm">Welcome, {{ username }}!</p>
 <p class="text-xl">click on these exciting topics to vote! You can keep editing your choices until the voting is closed.</p>
 <ul class="list-disc text-lg">
     {% for item, vote_data in items_votes %}

@@ -22,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Application definition
 
+AUTHENTICATION_BACKENDS = ['voting.auth.AuthBackend']
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

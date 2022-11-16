@@ -1,14 +1,37 @@
 from .models import YesNoAbstain
 from django import forms
 from typing import Any
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import VoteEvent, VoteItem, YNAVote
 from django.views.generic.edit import CreateView, UpdateView, FormMixin
 from django.urls import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseServerError
 
 
+def do_login(request, user_id=None):
+    logout(request)
+    user = authenticate(request, user_id=user_id)
+    if user is not None:
+        login(request, user)
+        return redirect('voting:index')
+    else:
+        return HttpResponseServerError()
+
+
+@staff_member_required
+def stats(request):
+    pass
+
+
+@login_required
 def index(request):
     events = VoteEvent.objects.order_by('-start_at')
     event = events.first()
@@ -23,7 +46,8 @@ def index(request):
                           'yna_id': item.id, 'pk': vote.id})
         vote_data = {'vote': vote, 'url': url}
         items_votes.append((item, vote_data))
-    context = {'event': event, 'items_votes': items_votes}
+    context = {'event': event, 'items_votes': items_votes,
+               'username': request.user.username}
     # User.objects.filter(pk=1).prefetch_related('ynavote_set', 'choicevote_set')
     return render(request, 'voting/index.html', context)
 
@@ -59,7 +83,7 @@ class YNAMixin:
         return res
 
 
-class YNACreateView(YNAMixin, CreateView):
+class YNACreateView(LoginRequiredMixin, YNAMixin, CreateView):
     model = YNAVote
     form_class = YNAForm
     success_url = reverse_lazy('voting:index')
@@ -70,7 +94,7 @@ class YNACreateView(YNAMixin, CreateView):
         return super().form_valid(form)
 
 
-class YNAUpdateView(YNAMixin, UpdateView):
+class YNAUpdateView(LoginRequiredMixin, YNAMixin, UpdateView):
     model = YNAVote
     form_class = YNAForm
     success_url = reverse_lazy('voting:index')
