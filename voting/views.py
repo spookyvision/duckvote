@@ -38,9 +38,12 @@ def stats(request):
         num_yes_votes = all_votes.filter(choice='Y').count()
         num_no_votes = all_votes.filter(choice='N').count()
         num_valid_votes = num_yes_votes + num_no_votes
-        yes_percent = (100 * num_yes_votes)/num_valid_votes
-        no_percent = 100 - yes_percent
-        details = f'yes: {num_yes_votes} ({yes_percent:.1f}%) no: {num_no_votes} ({no_percent:.1f}%)'
+        if num_valid_votes > 0:
+            yes_percent = (100 * num_yes_votes)/num_valid_votes
+            no_percent = 100 - yes_percent
+            details = f'yes: {num_yes_votes} ({yes_percent:.1f}%) no: {num_no_votes} ({no_percent:.1f}%)'
+        else:
+            details = f'no valid votes! :('
         accepted = num_yes_votes > num_no_votes
 
         item_stats = {
