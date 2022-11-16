@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     'django_extensions',
+    'django.contrib.humanize',
     'ordered_model',
     'tailwind',
     'django_browser_reload',

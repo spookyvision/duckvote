@@ -8,6 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -28,11 +29,36 @@ def do_login(request, user_id=None):
 
 @staff_member_required
 def stats(request):
-    pass
+    events = VoteEvent.objects.order_by('-start_at')
+    event = events.first()
+    vote_items = YesNoAbstain.objects.filter(event=event)
+    stats = []
+    for item in vote_items:
+        all_votes = item.ynavote_set.all()
+        num_yes_votes = all_votes.filter(choice='Y').count()
+        num_no_votes = all_votes.filter(choice='N').count()
+        num_valid_votes = num_yes_votes + num_no_votes
+        yes_percent = (100 * num_yes_votes)/num_valid_votes
+        no_percent = 100 - yes_percent
+        details = f'yes: {num_yes_votes} ({yes_percent:.1f}%) no: {num_no_votes} ({no_percent:.1f}%)'
+        accepted = num_yes_votes > num_no_votes
+
+        item_stats = {
+            'description': item.description,
+            'total_votes': len(all_votes),
+            'valid_votes': num_valid_votes,
+            'accepted': accepted,
+            'details': details
+        }
+        stats.append(
+            item_stats
+        )
+    return render(request, 'voting/stats.html', {'event': event, 'stats': stats})
 
 
 @login_required
 def index(request):
+    # TODO -> manager
     events = VoteEvent.objects.order_by('-start_at')
     event = events.first()
     items = VoteItem.objects.filter(event=event)

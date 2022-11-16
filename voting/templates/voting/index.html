@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
+{% load humanize %}
+
 {% block title %}
 {{ event.description }}
 
 <p class="text-sm">
-    {% if event.is_active %}
-    votiing is live! (TODO hms left)
+    {% if event.is_live %}
+    votiing is live! (ends in {{ event.end_at | naturaltime }})
     {% elif event.has_ended %}
-    event has ended at TODO
+    event has ended {{ event.end_at | naturaltime }}!
     {% else %}
-    event has not started yet, come back later! (starts at TODO, in TODO hms)
+    event has not started yet, come back later! ({{ event.start_at | naturaltime }})
     {% endif %}
 </p>
 {%endblock%}

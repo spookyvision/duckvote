@@ -12,4 +12,4 @@ class AuthBackend(AllowAllUsersModelBackend):
         if user_id is not None:
             return User.objects.get(user_id=user_id)
         else:
-            return super().authenticate(request, username=None, password=kwargs.get('password'), **kwargs)
+            return super().authenticate(request, **kwargs)
