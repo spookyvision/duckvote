@@ -18,16 +18,16 @@
 		{% tailwind_css %}
 	</head>
 
-	<body class="antialiased text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900">
+	<body class="antialiased text-slate-500 dark:text-slate-400 bg-white dark:bg-stone-900">
 		<div class="container mx-auto">
 			<div class="flex items-center justify-center m-2">
-				<h1 class="text-5xl">
+				<h1 class="text-5xl text-slate-600 dark:text-slate-300">
 				{% block title %}
 				{%endblock%}
 				</h1>
 			</div>
 
-			<div class="m-1">
+			<div class="container m-1">
 			{% block content %}
 			{% endblock %}
 			</div>
