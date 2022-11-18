@@ -19,6 +19,7 @@ class UserManager(BaseUserManager):
             raise ValueError("The given username must be set")
         username = User.normalize_username(username)
         user = User(username=username, user_id=uuid4(), **extra_fields)
+        # TODO test if empty password login is somehow possible
         user.password = make_password(password)
         user.save(using=self._db)
         return user
@@ -37,12 +38,13 @@ class UserManager(BaseUserManager):
         return self._create_user(username, password, **extra_fields)
 
 
+# TODO probably don't need a custom user model, just the manager
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.UUIDField(unique=True)
     is_admin = models.BooleanField(default=False)
     # TODO _most_ will be email addresses, but not the admin...
     username = models.CharField(
-        _("username/email"), unique=True, max_length=254)
+        _("username/email"), unique=True, max_length=255)
     USERNAME_FIELD = 'username'
     objects = UserManager()
 
@@ -51,6 +53,24 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+
+class UserProfile(models.Model):
+    """Model definition for UserProfile."""
+
+    facebook_name = models.CharField(_('facebook name'), max_length=255)
+    user = models.ForeignKey(User, verbose_name=_(
+        "user"), on_delete=models.CASCADE)
+
+    class Meta:
+        """Meta definition for UserProfile."""
+
+        verbose_name = 'user profile'
+        verbose_name_plural = 'user profiles'
+
+    def __str__(self):
+        """Unicode representation of UserProfile."""
+        return self.facebook_name
 
 
 class VoteEvent(models.Model):
@@ -131,25 +151,25 @@ class YNAVote(models.Model):
         return str(choices[self.choice])
 
 
-class MultipleChoice(VoteItem):
-    max_votes = models.PositiveIntegerField()
+# class MultipleChoice(VoteItem):
+#     max_votes = models.PositiveIntegerField()
 
-    def user_vote(self, user):
-        return None
-
-
-class ChoiceOption(models.Model):
-    item = models.ForeignKey(MultipleChoice, on_delete=models.CASCADE)
-    description = models.CharField(_('description'), max_length=254)
-
-    def __str__(self):
-        """Unicode representation of a choice option."""
-        return self.description
+#     def user_vote(self, user):
+#         return None
 
 
-class ChoiceVote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    choice = models.ForeignKey(ChoiceOption, on_delete=models.CASCADE)
+# class ChoiceOption(models.Model):
+#     item = models.ForeignKey(MultipleChoice, on_delete=models.CASCADE)
+#     description = models.CharField(_('description'), max_length=255)
 
-    class Meta:
-        unique_together = ('user', 'choice')
+#     def __str__(self):
+#         """Unicode representation of a choice option."""
+#         return self.description
+
+
+# class ChoiceVote(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     choice = models.ForeignKey(ChoiceOption, on_delete=models.CASCADE)
+
+#     class Meta:
+#         unique_together = ('user', 'choice')

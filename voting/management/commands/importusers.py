@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
-from voting.models import User
+from django.core.management.base import BaseCommand
+from voting.models import User, UserProfile
 import csv
 import json
 
@@ -11,8 +11,6 @@ class Command(BaseCommand):
         parser.add_argument('file', type=str)
 
     def handle(self, *args, **options):
-        out = [
-            ['FirstName', 'Email', 'Id']]
         with open(options['file']) as fh:
             reader = csv.reader(fh)
             next(reader, None)
@@ -24,14 +22,9 @@ class Command(BaseCommand):
                     continue
                 try:
                     user = User.objects.create_user(email)
-                    out.append([
-                        facebook_name.split(' ')[0],
-                        email,
-                        str(user.user_id)
-                    ])
+                    profile = UserProfile(
+                        user=user, facebook_name=facebook_name)
+                    profile.save()
                     self.stdout.write(self.style.SUCCESS(f'{email}'))
                 except:
                     self.stdout.write(self.style.WARNING(f'could not {email}'))
-        with open('users.json', 'w', encoding='utf-8') as fh:
-            json.dump(out, fh)
-        self.stdout.write(self.style.SUCCESS('all done.'))

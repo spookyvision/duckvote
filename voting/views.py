@@ -4,6 +4,7 @@ from typing import Any
 from django.shortcuts import render, redirect
 from .models import VoteEvent, VoteItem, YNAVote
 from django.views.generic.edit import CreateView, UpdateView, FormMixin
+from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -27,10 +28,18 @@ def do_login(request, user_id=None):
         return HttpResponseServerError()
 
 
+@require_POST
+def do_logout(request):
+    logout(request)
+    return redirect('voting:logged_out')
+
+
 @staff_member_required
 def stats(request):
     events = VoteEvent.objects.order_by('-start_at')
     event = events.first()
+    User.objects.annotate(ny=Count('ynavote', filter=Q(
+        ynavote__yna__event=0))).filter(ny__gt=0)
     vote_items = YesNoAbstain.objects.filter(event=event)
     stats = []
     for item in vote_items:
