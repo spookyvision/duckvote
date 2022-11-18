@@ -100,7 +100,7 @@ def index(request):
         vote_data = {'vote': vote, 'url': url}
         items_votes.append((item, vote_data))
     context = {'event': event, 'items_votes': items_votes,
-               'username': request.user.username}
+               'first_name': request.user.profile.facebook_name.split(' ')[0]}
     # User.objects.filter(pk=1).prefetch_related('ynavote_set', 'choicevote_set')
     return render(request, 'voting/index.html', context)
 
