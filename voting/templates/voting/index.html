@@ -42,7 +42,9 @@
     Voting has not started yet, come back later! ({{ event.start_at | naturaltime }})
     {% endif %}
 </p>
-<p class="my-4 text-xl text-sky-700 dark:text-sky-400">Click on these exciting topics to vote! You can keep editing your choices until the voting is closed. Board candidates are shuffled on every page load to guarantee equal visibility.</p>
+<p class="my-4 text-lg text-sky-700 dark:text-sky-400">Click on these exciting topics to vote!<br>
+    You can keep editing your choices until the voting is closed.<br>
+    Board candidates are shuffled on every page load to guarantee equal visibility.</p>
 <ul class="list-disc text-lg">
     {% for item, vote_data in items_votes %}
     <li class="text-sky-500 dark:text-sky-500 my-6"><a href="{{ vote_data.url }}">{{ item.description }}</a>
