@@ -1,7 +1,8 @@
-from django import forms
 from typing import Any
+from random import shuffle
+
+from django import forms
 from django.shortcuts import render, redirect
-from .models import YesNoAbstain, User, VoteEvent, VoteItem, YNAVote
 from django.views.generic.edit import CreateView, UpdateView, FormMixin
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy, reverse
@@ -15,6 +16,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseServerError
+
+from .models import YesNoAbstain, User, VoteEvent, VoteItem, YNAVote
 
 
 def do_login(request, user_id=None):
@@ -89,8 +92,12 @@ def index(request):
     events = VoteEvent.objects.order_by('-start_at')
     event = events.first()
     items = VoteItem.objects.filter(event=event)
+    board_candidates = items.filter(description__startswith='BOARD')
+    other_items = list(items.exclude(id__in=board_candidates))
+    board_candidates = list(board_candidates)
+    shuffle(board_candidates)
     items_votes = []
-    for item in items:
+    for item in other_items + board_candidates:
         vote = item.user_vote(request.user)
         if vote is None:
             url = reverse('voting:create_yna',  kwargs={'yna_id': item.id})
