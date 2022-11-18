@@ -59,8 +59,8 @@ class UserProfile(models.Model):
     """Model definition for UserProfile."""
 
     facebook_name = models.CharField(_('facebook name'), max_length=255)
-    user = models.ForeignKey(User, verbose_name=_(
-        "user"), on_delete=models.CASCADE)
+    user = models.OneToOneField(User, verbose_name=_(
+        "user"), related_name='profile', on_delete=models.CASCADE)
 
     class Meta:
         """Meta definition for UserProfile."""
@@ -77,6 +77,7 @@ class VoteEvent(models.Model):
     class Meta:
         verbose_name = _("vote event")
         verbose_name_plural = _("vote events")
+        ordering = ('-start_at',)
 
     description = models.TextField(_('event description'))
     start_at = models.DateTimeField(

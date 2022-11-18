@@ -1,15 +1,14 @@
-from .models import YesNoAbstain
 from django import forms
 from typing import Any
 from django.shortcuts import render, redirect
-from .models import VoteEvent, VoteItem, YNAVote
+from .models import YesNoAbstain, User, VoteEvent, VoteItem, YNAVote
 from django.views.generic.edit import CreateView, UpdateView, FormMixin
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -36,11 +35,19 @@ def do_logout(request):
 
 @staff_member_required
 def stats(request):
-    events = VoteEvent.objects.order_by('-start_at')
+    events = VoteEvent.objects.all()
     event = events.first()
-    User.objects.annotate(ny=Count('ynavote', filter=Q(
-        ynavote__yna__event=0))).filter(ny__gt=0)
     vote_items = YesNoAbstain.objects.filter(event=event)
+
+    users_with_votes = list(User.objects.annotate(ny=Count('ynavote', filter=Q(
+        ynavote__yna__event=event))).filter(ny__gt=0))
+    users_with_votes.sort(
+        key=lambda user: user.profile.facebook_name.split(' ')[-1])
+
+    num_all_users = len(User.objects.all())
+    num_users_with_votes = len(users_with_votes)
+    quorum_reached = num_users_with_votes/num_all_users >= 1/4
+
     stats = []
     for item in vote_items:
         all_votes = item.ynavote_set.all()
@@ -65,7 +72,15 @@ def stats(request):
         stats.append(
             item_stats
         )
-    return render(request, 'voting/stats.html', {'event': event, 'stats': stats})
+        context = {
+            'quorum_reached': quorum_reached,
+            'num_all_users': num_all_users,
+            'num_users_with_votes': num_users_with_votes,
+            'users_with_votes': users_with_votes,
+            'event': event,
+            'stats': stats
+        }
+    return render(request, 'voting/stats.html', context)
 
 
 @login_required

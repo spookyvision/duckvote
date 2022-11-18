@@ -8,7 +8,19 @@
 {% block content%}
 
 
+
 <div class="px-4 py-8 sm:px-8">
+
+    <div class="my-4">
+        <p>All users (= number of members): {{ num_all_users }}</p>
+        <p>Number of users who voted on at least item: {{ num_users_with_votes }}
+            
+            {% if not quorum_reached %}
+                <strong> - quorum not reached! </strong>
+            {% endif %}
+                
+        </p>
+    </div>
 <table class="border-separate border-spacing-2 w-full border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-sm shadow-sm">
     <thead class="bg-slate-50 dark:bg-slate-700">
         <tr>
@@ -31,5 +43,21 @@
         {% endfor %}
     </tbody>
 <table>
+
+    <h3 class="my-4 text-xl">
+        Names of users who voted/attended
+    </h3>
+    <ul>
+
+        
+        {% if not users_with_votes %}
+        No one so far!
+        {% endif %}
+            
+        {% for user in users_with_votes %}
+            <li>{{ user.profile.facebook_name }}</li>
+        {% endfor %}
+            
+    </ul>
 </div>
 {% endblock%}

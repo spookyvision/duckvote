@@ -5,7 +5,7 @@ from ordered_model.admin import OrderedModelAdmin
 from django import forms
 
 
-# admin.site.register((VoteEvent, ChoiceOption))
+admin.site.register((VoteEvent,))
 
 
 @admin.register(VoteItem)
