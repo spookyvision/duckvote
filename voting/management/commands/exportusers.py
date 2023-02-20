@@ -21,5 +21,5 @@ class Command(BaseCommand):
                     user.username,
                     str(user.user_id)
                 ])
-            json.dump(out, fh)
+            json.dump(out, fh, indent=4)
         self.stdout.write(self.style.SUCCESS('all done.'))
